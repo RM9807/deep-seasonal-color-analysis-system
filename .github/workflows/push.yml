@@ -1,4 +1,4 @@
-name: Push to Replicate
+name: Push to Replicate (Definitive)
 
 on:
   workflow_dispatch:
@@ -11,11 +11,6 @@ jobs:
   push_to_replicate:
     name: Push to Replicate
     runs-on: ubuntu-latest
-    # This sets the default directory for ALL steps in this job
-    defaults:
-      run:
-        working-directory: ./deep-seasonal-color-analysis-system
-        
     steps:
       - name: Free disk space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -23,18 +18,34 @@ jobs:
           tool-cache: false
           docker-images: false
 
-      - name: Checkout
+      - name: Checkout repository code
         uses: actions/checkout@v4
-        with:
-          # This ensures the code is checked out into a predictable folder name
-          path: 'deep-seasonal-color-analysis-system' 
 
-      - name: Setup Cog
+      - name: Setup Cog tool
         uses: replicate/setup-cog@v2
         with:
           token: ${{ secrets.REPLICATE_API_TOKEN }}
 
-      # This step will run inside the 'deep-seasonal-color-analysis-system' directory
-      # because of the 'defaults' setting above.
-      - name: Push to Replicate
-        run: cog push r8.im/${{ inputs.model_name }}
+      # ==========================================================
+      # THE "SOLVE THIS FOREVER" SCRIPT
+      # ==========================================================
+      - name: Find and Push from Correct Directory
+        run: |
+          echo "Searching for cog.yaml in the entire workspace..."
+          
+          # Find the directory containing cog.yaml
+          # 'find . -name cog.yaml' searches for the file
+          # 'xargs dirname' gets the directory path of the found file
+          COG_DIR=$(find . -name cog.yaml -print -quit | xargs dirname)
+          
+          if [ -z "$COG_DIR" ]; then
+            echo "::error::Could not find cog.yaml anywhere in the checkout. Listing all files for debugging:"
+            ls -R
+            exit 1
+          fi
+          
+          echo "Found cog.yaml in directory: $COG_DIR"
+          echo "Changing to that directory and pushing to Replicate..."
+          
+          # Change to the correct directory and then run the push command
+          cd "$COG_DIR" && cog push r8.im/${{ inputs.model_name }}
