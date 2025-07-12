@@ -11,6 +11,11 @@ jobs:
   push_to_replicate:
     name: Push to Replicate
     runs-on: ubuntu-latest
+    # This sets the default directory for ALL steps in this job
+    defaults:
+      run:
+        working-directory: ./deep-seasonal-color-analysis-system
+        
     steps:
       - name: Free disk space
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -20,11 +25,16 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # This ensures the code is checked out into a predictable folder name
+          path: 'deep-seasonal-color-analysis-system' 
 
       - name: Setup Cog
         uses: replicate/setup-cog@v2
         with:
           token: ${{ secrets.REPLICATE_API_TOKEN }}
 
+      # This step will run inside the 'deep-seasonal-color-analysis-system' directory
+      # because of the 'defaults' setting above.
       - name: Push to Replicate
         run: cog push r8.im/${{ inputs.model_name }}
