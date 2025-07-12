@@ -21,11 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # This step now correctly references the secret we just renamed.
       - name: Setup Cog
         uses: replicate/setup-cog@v2
         with:
           token: ${{ secrets.REPLICATE_API_TOKEN }}
 
       - name: Push to Replicate
-        run: cog push r8.im/rm9807/color-analysis
+        working-directory: ./deep-seasonal-color-analysis-system
+        run: cog push r8.im/${{ inputs.model_name }}
