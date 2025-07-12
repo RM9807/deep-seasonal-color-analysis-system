@@ -27,5 +27,4 @@ jobs:
           token: ${{ secrets.REPLICATE_API_TOKEN }}
 
       - name: Push to Replicate
-        working-directory: ./deep-seasonal-color-analysis-system
         run: cog push r8.im/${{ inputs.model_name }}
